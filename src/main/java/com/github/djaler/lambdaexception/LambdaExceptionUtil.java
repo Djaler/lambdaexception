@@ -19,6 +19,11 @@ public final class LambdaExceptionUtil {
     }
 
     @FunctionalInterface
+    public interface BiFunctionWithExceptions<T, U, R, E extends Exception> {
+        R apply(T t, U u) throws E;
+    }
+
+    @FunctionalInterface
     public interface FunctionWithExceptions<T, R, E extends Exception> {
         R apply(T t) throws E;
     }
@@ -65,6 +70,17 @@ public final class LambdaExceptionUtil {
                 biConsumer.accept(t, u);
             } catch (Exception exception) {
                 throwAsUnchecked(exception);
+            }
+        };
+    }
+
+    public static <T, U, R, E extends Exception> BiFunction<T, U, R> rethrowBiFunction(BiFunctionWithExceptions<T, U, R, E> biFunction) throws E {
+        return (t, u) -> {
+            try {
+                return biFunction.apply(t, u);
+            } catch (Exception exception) {
+                throwAsUnchecked(exception);
+                return null;
             }
         };
     }
